@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
 
+const API_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_DEV_API_URL
+    : import.meta.env.VITE_API_URL;
+
 const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -9,18 +14,20 @@ const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState("");
 
+  // Pre-fill form when editing
   useEffect(() => {
     if (editingProject) {
-      setTitle(editingProject.title);
-      setDescription(editingProject.description);
-      setTechStack(editingProject.techStack);
-      setLiveLink(editingProject.liveLink);
-      setGithubLink(editingProject.githubLink);
+      setTitle(editingProject.title || "");
+      setDescription(editingProject.description || "");
+      setTechStack(editingProject.techStack || "");
+      setLiveLink(editingProject.liveLink || "");
+      setGithubLink(editingProject.githubLink || "");
       setPreview(editingProject.image || "");
+      setImage(null);
     }
   }, [editingProject]);
 
-  const handleImageUpload = async (e) => {
+  const handleImageUpload = (e) => {
     const file = e.target.files[0];
     setImage(file);
     setPreview(URL.createObjectURL(file));
@@ -29,27 +36,28 @@ const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let imageUrl = editingProject ? editingProject.image : "";
+    let imageUrl = editingProject?.image || "";
 
     if (image) {
       const formData = new FormData();
       formData.append("image", image);
 
       try {
-        const imageResponse = await fetch("http://localhost:5100/api/upload", {
+        const res = await fetch(`${API_URL}/api/upload`, {
           method: "POST",
           body: formData,
         });
-        const imageData = await imageResponse.json();
-        if (!imageData.success) throw new Error("Image upload failed");
-        imageUrl = imageData.imageUrl;
+
+        const data = await res.json();
+        if (!data.success) throw new Error("Image upload failed");
+        imageUrl = data.imageUrl;
       } catch (error) {
         console.error("Image Upload Error:", error);
         return;
       }
     }
 
-    const requestData = {
+    const payload = {
       title,
       description,
       techStack,
@@ -59,34 +67,39 @@ const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
     };
 
     try {
-      let response;
-      if (editingProject) {
-        response = await fetch(`http://localhost:5100/api/projects/${editingProject._id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestData),
-        });
-      } else {
-        response = await fetch("http://localhost:5100/api/projects", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestData),
-        });
-      }
+      const url = editingProject
+        ? `${API_URL}/api/projects/${editingProject._id}`
+        : `${API_URL}/api/projects`;
 
-      const result = await response.json();
+      const method = editingProject ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+
       if (!result.success) throw new Error("Failed to save project");
 
-      fetchProjects();
-      setEditingProject(null);
+      fetchProjects(); // Refresh list
+      setEditingProject(null); // Reset edit mode
+      setTitle("");
+      setDescription("");
+      setTechStack("");
+      setLiveLink("");
+      setGithubLink("");
+      setImage(null);
+      setPreview("");
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error saving project:", error);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">
+      <h2 className="text-2xl font-bold mb-4 text-gray-800">
         {editingProject ? "Edit Project" : "Add Project"}
       </h2>
 
@@ -104,12 +117,12 @@ const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
         placeholder="Project Description"
         required
         className="w-full p-2 border rounded mt-2"
-      ></textarea>
+      />
       <input
         type="text"
         value={techStack}
         onChange={(e) => setTechStack(e.target.value)}
-        placeholder="Tech Stack"
+        placeholder="Tech Stack (e.g. React, Node)"
         required
         className="w-full p-2 border rounded mt-2"
       />
@@ -144,7 +157,7 @@ const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
 
       <button
         type="submit"
-        className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mt-4"
       >
         {editingProject ? "Update Project" : "Save Project"}
       </button>

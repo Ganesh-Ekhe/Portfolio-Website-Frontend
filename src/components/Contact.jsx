@@ -7,8 +7,14 @@ const Contact = () => {
     message: "",
   });
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(null); // ✅ Success Message State
-  const [error, setError] = useState(null); // ✅ Error Message State
+  const [success, setSuccess] = useState(null);
+  const [error, setError] = useState(null);
+
+  // ✅ Use correct API based on environment
+  const API_URL =
+    import.meta.env.MODE === "development"
+      ? import.meta.env.VITE_DEV_API_URL
+      : import.meta.env.VITE_API_URL;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,7 +27,7 @@ const Contact = () => {
     setSuccess(null);
 
     try {
-      const response = await fetch("http://localhost:5100/api/contact", {
+      const response = await fetch(`${API_URL}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -30,7 +36,7 @@ const Contact = () => {
       const data = await response.json();
       if (data.success) {
         setSuccess("✅ Message sent successfully!");
-        setFormData({ name: "", email: "", message: "" }); // Clear form
+        setFormData({ name: "", email: "", message: "" });
       } else {
         throw new Error("❌ Failed to send message. Please try again.");
       }
@@ -73,13 +79,8 @@ const Contact = () => {
           className="w-full p-3 border rounded mt-2"
         ></textarea>
 
-        {/* ✅ Loading Spinner */}
         {loading && <p className="text-blue-500 mt-2">Sending...</p>}
-
-        {/* ✅ Success Message */}
         {success && <p className="text-green-500 mt-2">{success}</p>}
-
-        {/* ✅ Error Message */}
         {error && <p className="text-red-500 mt-2">{error}</p>}
 
         <button

@@ -1,6 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
 
+// 🔁 Dynamic API URL based on environment
+const API_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_DEV_API_URL
+    : import.meta.env.VITE_API_URL;
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -8,20 +14,22 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); // Reset error
+    setError("");
 
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/users/login`,
-        {
-          email,
-          password,
-        }
+        `${API_URL}/api/users/login`,
+        { email, password },
+        { withCredentials: true } // ✅ CORS & cookie support
       );
 
-      localStorage.setItem("token", res.data.token); // Save JWT Token
+      // ✅ Optional: Save token if backend returns one (use only if needed)
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+
       alert("✅ Login Successful!");
-      window.location.href = "/dashboard"; // Redirect
+      window.location.href = "/dashboard"; // Redirect after login
     } catch (err) {
       setError(err.response?.data?.message || "❌ Login Failed! Check your credentials.");
     }
@@ -35,7 +43,7 @@ const Login = () => {
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
         <form onSubmit={handleLogin} className="space-y-4">
-          {/* Email Input */}
+          {/* Email */}
           <div>
             <label className="block text-sm font-semibold">Email</label>
             <input
@@ -48,7 +56,7 @@ const Login = () => {
             />
           </div>
 
-          {/* Password Input */}
+          {/* Password */}
           <div>
             <label className="block text-sm font-semibold">Password</label>
             <input

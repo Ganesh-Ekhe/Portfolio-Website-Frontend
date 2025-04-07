@@ -7,7 +7,11 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const API_URL = import.meta.env.VITE_API_URL; // Railway backend URL
+  const API_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_DEV_API_URL
+    : import.meta.env.VITE_API_URL;
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

@@ -5,13 +5,18 @@ const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Auto switch between dev/prod URLs
+  const API_URL = import.meta.env.DEV
+    ? import.meta.env.VITE_DEV_API_URL
+    : import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     fetchProjects();
   }, []);
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/projects`);
+      const response = await fetch(`${API_URL}/api/projects`);
       const data = await response.json();
 
       if (data.success && Array.isArray(data.projects)) {
@@ -28,14 +33,14 @@ const Projects = () => {
 
   return (
     <section className="min-h-screen pt-12 pb-16 bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
-      <motion.h2 
+      <motion.h2
         className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-10 tracking-wider 
                    text-transparent bg-clip-text 
                    bg-gradient-to-r from-blue-600 via-purple-500 to-orange-400 
                    drop-shadow-xl font-poppins"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, type: 'spring', stiffness: 100 }}
+        transition={{ duration: 1, type: "spring", stiffness: 100 }}
       >
         My Projects
       </motion.h2>
@@ -49,8 +54,8 @@ const Projects = () => {
               <p className="text-gray-400 text-center col-span-3">No projects found.</p>
             ) : (
               projects.map((project, index) => (
-                <motion.div 
-                  key={project._id} 
+                <motion.div
+                  key={project._id}
                   className="relative bg-gray-800 bg-opacity-70 backdrop-blur-lg border border-gray-700 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transform transition-all duration-500 hover:scale-105 border-gradient"
                   initial={{ opacity: 0, y: 50 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -58,12 +63,12 @@ const Projects = () => {
                   whileHover={{ scale: 1.05, rotate: 1 }}
                 >
                   {project.image ? (
-                    <motion.img 
-                      src={`${import.meta.env.VITE_API_URL}${project.image}`} 
-                      alt={project.title} 
+                    <motion.img
+                      src={`${API_URL}${project.image}`}
+                      alt={project.title}
                       className="w-full h-48 object-cover rounded-t-2xl"
                       whileHover={{ scale: 1.03 }}
-                      onError={(e) => e.target.style.display = "none"}
+                      onError={(e) => (e.target.style.display = "none")}
                     />
                   ) : (
                     <div className="h-48 bg-gray-700 flex items-center justify-center text-gray-400 text-lg">
@@ -83,18 +88,18 @@ const Projects = () => {
                     </p>
 
                     <div className="flex justify-between mt-5">
-                      <motion.a 
-                        href={project.liveLink} 
-                        target="_blank" 
+                      <motion.a
+                        href={project.liveLink}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-white bg-blue-500 px-4 py-2 rounded-lg shadow hover:bg-blue-400 transform transition-all duration-300 hover:scale-110"
                         whileHover={{ scale: 1.1 }}
                       >
                         Live Demo
                       </motion.a>
-                      <motion.a 
-                        href={project.githubLink} 
-                        target="_blank" 
+                      <motion.a
+                        href={project.githubLink}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-white bg-gray-700 px-4 py-2 rounded-lg shadow hover:bg-gray-600 transform transition-all duration-300 hover:scale-110"
                         whileHover={{ scale: 1.1 }}
