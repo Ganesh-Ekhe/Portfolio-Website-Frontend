@@ -11,7 +11,7 @@ const Projects = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch("http://localhost:5100/api/projects");
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/projects`);
       const data = await response.json();
 
       if (data.success && Array.isArray(data.projects)) {
@@ -29,18 +29,16 @@ const Projects = () => {
   return (
     <section className="min-h-screen pt-12 pb-16 bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
       <motion.h2 
-  className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-10 tracking-wider 
-             text-transparent bg-clip-text 
-             bg-gradient-to-r from-blue-600 via-purple-500 to-orange-400 
-             drop-shadow-xl font-poppins"
-  initial={{ opacity: 0, y: -50 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 1, type: 'spring', stiffness: 100 }}
->
-   My Projects
-</motion.h2>
-
-
+        className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-10 tracking-wider 
+                   text-transparent bg-clip-text 
+                   bg-gradient-to-r from-blue-600 via-purple-500 to-orange-400 
+                   drop-shadow-xl font-poppins"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, type: 'spring', stiffness: 100 }}
+      >
+        My Projects
+      </motion.h2>
 
       {loading ? (
         <p className="text-center text-gray-400 animate-pulse">Loading projects...</p>
@@ -61,7 +59,7 @@ const Projects = () => {
                 >
                   {project.image ? (
                     <motion.img 
-                      src={`http://localhost:5100${project.image}`} 
+                      src={`${import.meta.env.VITE_API_URL}${project.image}`} 
                       alt={project.title} 
                       className="w-full h-48 object-cover rounded-t-2xl"
                       whileHover={{ scale: 1.03 }}
